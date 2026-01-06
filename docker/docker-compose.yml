@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    networks:
+      - simulator-network
+    restart: unless-stopped
+
+  simulator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: simulator
+    depends_on:
+      - mosquitto
+    volumes:
+      - ../configs:/app/configs
+    environment:
+      - CONFIG_PATH=/app/configs/local.yaml
+    networks:
+      - simulator-network
+    restart: unless-stopped
+    command: ["simulator", "run", "--config", "/app/configs/local.yaml", "--adapter", "mqtt"]
+
+networks:
+  simulator-network:
+    driver: bridge
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+
