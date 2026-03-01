@@ -1,0 +1,47 @@
+# Docker 개발환경용: Gateway API Compose 내 Mosquitto(호스트 포트 1884)로 publish
+# 사용: .\simulator.exe run --config .\configs\docker.yaml
+# 전제: Gateway는 docker compose up 으로 실행 중, Simulator는 호스트에서 실행
+
+adapter: mqtt
+
+# 고정 설정 예시: 특정 공장, 라인, 센서로 고정 (fixed.yaml과 동일)
+generator:
+  source_id: "ulsan-line2"  # 고정: ulsan 공장의 line2
+  factory_id: "Ulsan"  # 고정: Ulsan 공장
+  equipment_type: "Sensor"
+  equipment_name: "Temperature Sensor Line2"  # 고정: 센서 이름
+  random_factory: false  # 랜덤 비활성화 - factory_id 사용
+  random_source: false  # 랜덤 비활성화 - source_id 사용
+  tags:
+    - tag: "temp"  # 고정: 온도 센서만 사용
+      pattern: "uniform"
+      min: 20.0
+      max: 70.0
+      unit: "C"
+      quality: "Good"
+
+engine:
+  rate_mode: "interval"
+  interval_ms: 1000
+  jitter_percent: 10.0
+  queue_size: 1000
+  overflow_policy: "drop_oldest"
+  retry_count: 3
+  metrics_interval: 10s
+
+mqtt:
+  # Gateway Compose 내 Mosquitto (호스트에서 접속 시 1884)
+  broker: "localhost:1884"
+  client_id: "simulator-docker-ulsan-line2"
+  username: ""
+  password: ""
+  tls: false
+  keepalive: 60
+  qos: 1
+  retain: false
+  # Gateway API 구독 패턴 factory/+/+/telemetry 에 맞춤
+  topic_template: "factory/{line}/{source_id}/telemetry"
+  line: "line-2"
+  reconnect_max_retries: 10
+  reconnect_max_wait: 60s
+  reconnect_initial_wait: 1s

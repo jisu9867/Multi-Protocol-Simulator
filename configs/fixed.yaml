@@ -1,0 +1,43 @@
+adapter: mqtt
+
+# 고정 설정 예시: 특정 공장, 라인, 센서로 고정
+generator:
+  source_id: "ulsan-line2"  # 고정: ulsan 공장의 line2
+  factory_id: "Ulsan"  # 고정: Ulsan 공장
+  equipment_type: "Sensor"
+  equipment_name: "Temperature Sensor Line2"  # 고정: 센서 이름
+  random_factory: false  # 랜덤 비활성화 - factory_id 사용
+  random_source: false  # 랜덤 비활성화 - source_id 사용
+  tags:
+    # 특정 센서만 사용하려면 하나만 남기고 나머지 제거
+    - tag: "temp"  # 고정: 온도 센서만 사용
+      pattern: "uniform"
+      min: 20.0
+      max: 70.0
+      unit: "C"
+      quality: "Good"
+    # 다른 센서는 주석 처리하거나 제거
+
+engine:
+  rate_mode: "interval"
+  interval_ms: 1000
+  jitter_percent: 10.0
+  queue_size: 1000
+  overflow_policy: "drop_oldest"
+  retry_count: 3
+  metrics_interval: 10s
+
+mqtt:
+  broker: "localhost:1883"
+  client_id: "simulator-fixed-ulsan-line2"
+  username: ""
+  password: ""
+  tls: false
+  keepalive: 60
+  qos: 1
+  retain: false
+  topic_template: "factory/{source_id}/telemetry"
+  reconnect_max_retries: 10
+  reconnect_max_wait: 60s
+  reconnect_initial_wait: 1s
+

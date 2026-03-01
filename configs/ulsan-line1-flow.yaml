@@ -1,0 +1,43 @@
+adapter: mqtt
+
+generator:
+  source_id: "ulsan-line1"  # Fixed source ID matching backend format
+  factory_id: "Ulsan"       # Fixed factory ID
+  equipment_type: "Sensor"
+  equipment_name: "Flow Sensor Line1"
+  random_factory: false     # Don't randomize factory
+  random_source: false      # Don't randomize source ID
+  tags:
+    # Flow Rate - random values between 100-150 L/min
+    - tag: "flow"
+      pattern: "uniform"
+      min: 100.0
+      max: 150.0
+      unit: "L/min"
+      quality: "Good"
+
+engine:
+  rate_mode: "interval"
+  interval_ms: 1000         # Publish every 1 second
+  jitter_percent: 10.0
+  queue_size: 1000
+  overflow_policy: "drop_oldest"
+  retry_count: 3
+  metrics_interval: 10s
+
+mqtt:
+  # 로컬 Mosquitto broker (localhost 또는 Docker container)
+  broker: "localhost:1883"
+  client_id: "simulator-ulsan-line1-flow"
+  username: ""
+  password: ""
+  tls: false
+  keepalive: 60
+  qos: 1
+  retain: false
+  topic_template: "factory/{line}/{source_id}/telemetry"
+  line: "line-1"
+  reconnect_max_retries: 10
+  reconnect_max_wait: 60s
+  reconnect_initial_wait: 1s
+

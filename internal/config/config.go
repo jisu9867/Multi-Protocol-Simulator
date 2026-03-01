@@ -35,6 +35,15 @@ func LoadConfig(configPath string) (*Config, error) {
 	if config.Generator.SourceID == "" {
 		config.Generator.SourceID = v.GetString("generator.source_id")
 	}
+	
+	// Explicitly load random_factory and random_source flags
+	// Viper might not unmarshal boolean values correctly in some cases
+	if v.IsSet("generator.random_factory") {
+		config.Generator.RandomFactory = v.GetBool("generator.random_factory")
+	}
+	if v.IsSet("generator.random_source") {
+		config.Generator.RandomSource = v.GetBool("generator.random_source")
+	}
 	if config.MQTT.TopicTemplate == "" {
 		config.MQTT.TopicTemplate = v.GetString("mqtt.topic_template")
 	}

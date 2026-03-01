@@ -1,0 +1,40 @@
+﻿{
+  "apiVersion": "2021-10-01",
+  "type": "Microsoft.ContainerInstance/containerGroups",
+  "name": "mosquitto-broker",
+  "location": "koreacentral",
+  "properties": {
+    "containers": [
+      {
+        "name": "mosquitto-broker",
+        "properties": {
+          "image": "eclipse-mosquitto:2.0",
+          "resources": {
+            "requests": {
+              "cpu": 1,
+              "memoryInGb": 1
+            }
+          },
+          "ports": [
+            {"port": 1883, "protocol": "TCP"},
+            {"port": 8883, "protocol": "TCP"}
+          ],
+          "command": [
+            "/bin/sh",
+            "-c",
+            "mkdir -p /mosquitto/config && echo 'listener 1883 0.0.0.0' > /mosquitto/config/mosquitto.conf && echo 'allow_anonymous true' >> /mosquitto/config/mosquitto.conf && echo 'log_dest stdout' >> /mosquitto/config/mosquitto.conf && echo 'log_type all' >> /mosquitto/config/mosquitto.conf && echo 'connection_messages true' >> /mosquitto/config/mosquitto.conf && mosquitto -c /mosquitto/config/mosquitto.conf"
+          ]
+        }
+      }
+    ],
+    "osType": "Linux",
+    "ipAddress": {
+      "type": "Public",
+      "ports": [
+        {"port": 1883, "protocol": "TCP"},
+        {"port": 8883, "protocol": "TCP"}
+      ],
+      "dnsNameLabel": "mosquitto-gateway-$(Get-Date -Format 'yyyyMMddHHmmss')"
+    }
+  }
+}

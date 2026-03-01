@@ -2,6 +2,9 @@ adapter: mqtt
 
 generator:
   source_id: "sim-001"
+  factory_id: "Ulsan"  # Options: Ulsan, Asan, Jeonju, Hwaseong
+  equipment_type: "Sensor"
+  equipment_name: "Temperature Sensor 1"
   tags:
     - tag: "temp"
       pattern: "uniform"

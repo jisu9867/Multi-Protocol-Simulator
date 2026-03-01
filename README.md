@@ -149,6 +149,60 @@ simulator run --config ./configs/local.yaml
 ./simulator dry-run --config ./configs/local.yaml --count 10
 ```
 
+#### Azure Container Instances MQTT Broker 사용
+
+Azure Container Instances에 배포된 Mosquitto broker로 데이터를 publish하려면:
+
+1. **Azure MQTT Broker FQDN 확인**
+
+```powershell
+# PowerShell
+az container show `
+  --resource-group rg-gateway-dev-korea-01 `
+  --name mosquitto-broker `
+  --query ipAddress.fqdn -o tsv
+```
+
+```bash
+# Bash
+az container show \
+  --resource-group rg-gateway-dev-korea-01 \
+  --name mosquitto-broker \
+  --query ipAddress.fqdn -o tsv
+```
+
+2. **Azure 설정 파일 업데이트**
+
+`configs/azure.yaml` 파일의 `mqtt.broker` 값을 위에서 확인한 FQDN으로 업데이트합니다:
+
+```yaml
+mqtt:
+  broker: "mosquitto-gateway-xxxxx.koreacentral.azurecontainer.io:1883"
+  # ... 나머지 설정
+```
+
+3. **Azure Broker로 시뮬레이터 실행**
+
+```bash
+# Azure broker로 실행
+./simulator run --config ./configs/azure.yaml --adapter mqtt
+
+# 또는 설치된 경우
+simulator run --config ./configs/azure.yaml --adapter mqtt
+```
+
+4. **연결 확인**
+
+시뮬레이터가 Azure broker에 연결되면 로그에서 다음과 같은 메시지를 확인할 수 있습니다:
+
+```
+[INFO] Connecting to MQTT broker mosquitto-gateway-xxxxx.koreacentral.azurecontainer.io:1883
+[INFO] Connected to MQTT broker successfully
+[INFO] Publishing telemetry messages...
+```
+
+⚠️ **참고**: Azure Container Instances의 Mosquitto broker는 공개 인터넷을 통해 접근 가능하므로 방화벽 규칙을 확인해야 합니다.
+
 #### Docker Compose로 전체 실행
 
 ```bash

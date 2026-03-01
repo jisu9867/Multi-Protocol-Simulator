@@ -172,16 +172,28 @@ func (e *Engine) publisherLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			// Drain queue
+			// Drain queue - only publish valid messages
 			for {
 				select {
-				case msg := <-e.queue:
-					e.publishMessage(ctx, msg)
+				case msg, ok := <-e.queue:
+					if !ok {
+						// Channel is closed, we're done
+						return
+					}
+					// Only publish valid messages (not zero values)
+					if e.isValidMessage(msg) {
+						e.publishMessage(ctx, msg)
+					}
 				default:
+					// Queue is empty, we're done draining
 					return
 				}
 			}
-		case msg := <-e.queue:
+		case msg, ok := <-e.queue:
+			if !ok {
+				// Channel is closed, exit
+				return
+			}
 			e.metrics.SetQueueLength(int64(len(e.queue)))
 			e.publishMessage(ctx, msg)
 		}
@@ -272,10 +284,25 @@ func (e *Engine) metricsReporter(ctx context.Context) {
 	}
 }
 
+// isValidMessage checks if a message is valid (not a zero value)
+func (e *Engine) isValidMessage(msg TelemetryMessage) bool {
+	// Check if message has required fields set (not zero values)
+	return msg.SourceID != "" && msg.Tag != "" && !msg.TS.IsZero()
+}
+
 // stop stops the engine gracefully
 func (e *Engine) stop() {
+	// Cancel context to signal shutdown
 	e.cancel()
+	
+	// Wait a bit for goroutines to process cancellation
+	// This allows publisherLoop to drain the queue before we close it
+	time.Sleep(100 * time.Millisecond)
+	
+	// Close the queue after giving publisherLoop time to drain
 	close(e.queue)
+	
+	// Wait for all goroutines to finish
 	e.wg.Wait()
 	
 	// Close adapter

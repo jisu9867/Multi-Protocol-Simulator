@@ -1,3 +1,7 @@
+# local.yaml과 동일. 컨테이너 MQTT(Gateway Compose Mosquitto, 호스트 1884)로 publish
+# 사용: .\simulator.exe run --config .\configs\local-docker.yaml
+# 전제: Gateway는 docker compose up 으로 실행 중, Simulator는 호스트에서 실행
+
 adapter: mqtt
 
 generator:
@@ -6,11 +10,8 @@ generator:
   equipment_type: "Sensor"
   equipment_name: ""  # Empty to auto-generate based on tag and line number
   random_factory: true  # Randomly select factory (Ulsan, Asan, Jeonju) - 3 factories
-  # To fix factory/line: set random_factory: false, random_source: false, and specify factory_id and source_id
   random_source: true   # Randomly generate source ID in format "{factory}-line{1-3}" - 3 lines
-  # To fix sensor: remove unwanted tags from tags list, keep only the sensor you want
   tags:
-    # Temperature - random values between 20-70°C
     - tag: "temp"
       pattern: "uniform"
       min: 20.0
@@ -18,7 +19,6 @@ generator:
       unit: "C"
       quality: "Good"
     
-    # Humidity - random values between 30-80%
     - tag: "humidity"
       pattern: "uniform"
       min: 30.0
@@ -26,7 +26,6 @@ generator:
       unit: "%"
       quality: "Good"
     
-    # Pressure - random values between 900-1100 hPa
     - tag: "pressure"
       pattern: "uniform"
       min: 900.0
@@ -34,7 +33,6 @@ generator:
       unit: "hPa"
       quality: "Good"
     
-    # Vibration - random values between 0-1.0 mm/s
     - tag: "vibration"
       pattern: "uniform"
       min: 0.0
@@ -42,7 +40,6 @@ generator:
       unit: "mm/s"
       quality: "Good"
     
-    # Power - random values between 200-300 kW
     - tag: "power"
       pattern: "uniform"
       min: 200.0
@@ -50,7 +47,6 @@ generator:
       unit: "kW"
       quality: "Good"
     
-    # Flow Rate - random values between 100-150 L/min
     - tag: "flow"
       pattern: "uniform"
       min: 100.0
@@ -68,18 +64,17 @@ engine:
   metrics_interval: 10s
 
 mqtt:
-  # 로컬 Mosquitto broker (localhost 또는 Docker container)
-  broker: "localhost:1883"
-  client_id: "simulator-001"
+  # Gateway Compose Mosquitto (호스트에서 접속 시 1884)
+  broker: "localhost:1884"
+  client_id: "simulator-docker-001"
   username: ""
   password: ""
   tls: false
   keepalive: 60
   qos: 1
   retain: false
-  topic_template: "factory/{source_id}/telemetry"  # source_id already contains factory and line info (e.g., asan-line3)
-  # line: "line-1"  # Not needed when using source_id format
+  topic_template: "factory/{line}/{source_id}/telemetry"
+  line: "line-1"
   reconnect_max_retries: 10
   reconnect_max_wait: 60s
   reconnect_initial_wait: 1s
-
