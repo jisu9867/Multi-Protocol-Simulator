@@ -3,6 +3,9 @@
 /simulator.exe
 /simulator-*
 
+# Ensure cmd/simulator/ is always tracked
+!cmd/simulator/
+
 # IDE
 .idea/
 .vscode/
