@@ -1,7 +1,7 @@
-# Binaries
-simulator
-simulator.exe
-simulator-*
+# Binaries (root only – do not ignore cmd/simulator/)
+/simulator
+/simulator.exe
+/simulator-*
 
 # IDE
 .idea/
